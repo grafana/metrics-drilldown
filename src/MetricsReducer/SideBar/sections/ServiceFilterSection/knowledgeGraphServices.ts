@@ -15,7 +15,7 @@ export const KG_INSTRUMENTED_SERVICE_TYPE = 'instrumented';
 export const KG_MAX_JOBS = 10000;
 
 export interface KnowledgeGraphServices {
-  /** The instrumented services, named after their jobs the way that the job tab names them */
+  /** The instrumented services, named after their jobs the way that the job list names them */
   services: ServiceGroup[];
   /** True when the request returned as many jobs as it asked for, so the list may miss some */
   truncated: boolean;
@@ -43,7 +43,7 @@ export function buildInstrumentedJobsRequest({ start, end, limit }: { start: num
 /**
  * Lists the services that the Knowledge Graph knows as instrumented, over a time range in milliseconds, with one
  * request. The `job` property of a Service entity is the `job` label of its metrics. A job is named the way that the job
- * tab names it: the part after the first slash, or the whole job when it has no slash. The entity's own name is not part
+ * list names it: the part after the first slash, or the whole job when it has no slash. The entity's own name is not part
  * of this request, so a service whose name differs from the end of its job (`pyroscope-ad-hoc-profiles` has the job
  * `profiles-prod-012/ad-hoc-profiles`) shows under the name that its job gives.
  *

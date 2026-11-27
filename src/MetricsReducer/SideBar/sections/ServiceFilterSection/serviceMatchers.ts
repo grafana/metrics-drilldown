@@ -20,8 +20,18 @@ function getServiceFromJob(job: string): string {
   const slashIndex = job.indexOf('/');
   const service = slashIndex === -1 ? job : job.slice(slashIndex + 1);
 
-  // A job such as "ns/" has no service part, so the whole job stands for the service
-  return service === '' ? job : service;
+  // A job such as "ns/" (or "ns/" and a zero width space) has no visible service part, so the whole job stands for the
+  // service, and its row does not look empty
+  return isBlankValue(service) ? job : service;
+}
+
+/**
+ * A value made only of white space, control characters (such as \u0001) or invisible formatting characters (zero width
+ * space, byte order mark, soft hyphen) has no visible label. Its row would look empty and its filter would match no
+ * metric, so it is not listed.
+ */
+export function isBlankValue(value: string) {
+  return /^[\s\p{Cc}\p{Cf}]*$/u.test(value);
 }
 
 /**

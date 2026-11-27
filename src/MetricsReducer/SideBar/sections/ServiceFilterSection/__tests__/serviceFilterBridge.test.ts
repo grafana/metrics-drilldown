@@ -4,6 +4,7 @@ import { AdHocFiltersVariable, sceneUtils, SceneVariableSet, type AdHocFilterWit
 import {
   adoptServiceFilter,
   getFiltersWithoutManagedFilter,
+  getManagedServiceFilter,
   isServiceSelectionApplied,
   releaseManagedServiceFilter,
   removeManagedServiceFilter,
@@ -103,6 +104,33 @@ describe('setManagedServiceFilter', () => {
     setManagedServiceFilter(variable, 'namespace', []);
 
     expect(variable.state.filters.map((f) => [f.key, f.value])).toEqual([['job', 'shop/cart']]);
+  });
+});
+
+describe('the data source of the managed filter', () => {
+  test('is kept on the filter, and the filter is written again when it changes', () => {
+    const variable = createVariable();
+
+    setManagedServiceFilter(variable, JOB_LABEL, ['cart'], 'ds1');
+    expect(variable.state.filters[0].meta).toEqual({ source: SERVICE_FILTER_SOURCE, dataSource: 'ds1' });
+    expect(getManagedServiceFilter(variable, JOB_LABEL)?.dataSource).toBe('ds1');
+
+    setManagedServiceFilter(variable, JOB_LABEL, ['cart'], 'ds2');
+    expect(getManagedServiceFilter(variable, JOB_LABEL)?.dataSource).toBe('ds2');
+  });
+
+  test('is kept on an adopted filter', () => {
+    const variable = createVariable([{ key: 'job', operator: '=~', value: 'cart' }]);
+
+    adoptServiceFilter(variable, JOB_LABEL, ['cart'], 'ds1');
+
+    expect(getManagedServiceFilter(variable, JOB_LABEL)?.dataSource).toBe('ds1');
+  });
+
+  test('getManagedServiceFilter finds no filter that the user typed', () => {
+    const variable = createVariable([{ key: 'job', operator: '=~', value: 'cart' }]);
+
+    expect(getManagedServiceFilter(variable, JOB_LABEL)).toBeUndefined();
   });
 });
 

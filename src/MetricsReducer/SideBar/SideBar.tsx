@@ -33,6 +33,7 @@ import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetricsSection';
 import {
+  SERVICE_FILTER_MORE_URL_KEY,
   SERVICE_FILTER_SECTION_KEY,
   SERVICE_FILTER_URL_KEYS,
   ServiceFilterSection,
@@ -139,6 +140,10 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           ),
           icon: 'share-alt',
           active: Boolean(sectionValues.get(SERVICE_FILTER_SECTION_KEY)?.length),
+          // A sidebar that is built again (when the user comes back from a metric) gets no URL state from Scenes, so the
+          // section takes its filter back from what the URL kept
+          urlSelection: sectionValues.get(SERVICE_FILTER_SECTION_KEY),
+          urlShowExtras: SideBar.getServiceShowExtrasFromUrl(),
         }),
         new MetricsFilterSection({
           key: 'filters-rule',
@@ -207,11 +212,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   private onActivate() {
     const cleanupOtherMetricsVar = this.initOtherMetricsVar();
 
-    // The service filter keeps its selection and the top filters consistent, whether or not its section is open
-    const cleanupServiceFilter = this.state.sections
-      .filter((section) => section instanceof ServiceFilterSection)
-      .map((section) => section.watchFilters());
-
     this.subscribeToEvent(EventSectionValueChanged, (event) => {
       const { key, values } = event.payload;
       const { sectionValues } = this.state;
@@ -219,6 +219,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       this.setOtherMetricFilters(newSectionValues);
       this.setState({ sectionValues: newSectionValues });
     });
+
+    // The service filter keeps its selection and the top filters consistent, whether or not its section is open.
+    // It runs after the subscription above, so that the button hears of a selection that it restores or drops.
+    const cleanupServiceFilter = this.state.sections
+      .filter((section) => section instanceof ServiceFilterSection)
+      .map((section) => section.watchFilters());
 
     // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
     if (!this.state.visibleSection?.state.key) {
@@ -331,6 +337,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     );
 
     return sectionValues;
+  }
+
+  private static getServiceShowExtrasFromUrl() {
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const namespacedKey = `${embeddedTrailNamespace}-${SERVICE_FILTER_MORE_URL_KEY}`;
+
+    return Boolean(urlSearchParams.get(namespacedKey) || urlSearchParams.get(SERVICE_FILTER_MORE_URL_KEY));
   }
 
   /** The service filter escapes the commas that its values contain, so it reads its URL values with its own parser */

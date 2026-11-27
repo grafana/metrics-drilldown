@@ -39,7 +39,7 @@ const mockIsKgAvailable = isKgAnnotationsAvailable as jest.Mock;
 const mockFetchKgServices = fetchInstrumentedServices as jest.Mock;
 const mockLoggerError = logger.error as jest.Mock;
 
-// The job tab lists these as the services cart, checkout (two jobs) and prometheus
+// The job list shows these as the services cart, checkout (two jobs) and prometheus
 const JOBS = ['staging/checkout', 'shop/cart', 'prod/checkout', 'prometheus'];
 
 const JOB_URL_KEY = 'filters-service-job';
@@ -57,7 +57,9 @@ function mockLabelValues(values: Record<string, string[]> = { job: JOBS }) {
 function setup(
   filters: AdHocFilterWithLabels[] = [],
   /** Runs after the scene is active and before the section starts watching, like the URL restore before the sidebar activates */
-  beforeWatch?: (section: ServiceFilterSection) => void
+  beforeWatch?: (section: ServiceFilterSection) => void,
+  /** What the sidebar read from the URL when it was built */
+  urlHint: { urlSelection?: string[]; urlShowExtras?: boolean } = {}
 ) {
   const filtersVariable = new AdHocFiltersVariable({
     key: VAR_FILTERS,
@@ -73,6 +75,7 @@ function setup(
     title: 'Service filters',
     description: 'Filter metrics by service',
     icon: 'cube',
+    ...urlHint,
   });
   const timeRange = new SceneTimeRange({ from: 'now-1h', to: 'now' });
   const scene = new EmbeddedScene({
@@ -155,17 +158,11 @@ describe('ServiceFilterSection', () => {
         expect(mockFetchLabelValues.mock.calls.map(([label]) => label)).toEqual(['job']);
       });
 
-      it('has no tabs', async () => {
-        await openSection(setup());
-
-        expect(screen.queryAllByRole('tab')).toHaveLength(0);
-      });
-
       it('explains what a job is and how OpenTelemetry sets it, with links to the sources', async () => {
         await openSection(setup());
 
-        fireEvent.mouseEnter(screen.getByRole('button', { name: 'About this list' }));
-        const help = await screen.findByRole('tooltip');
+        fireEvent.click(screen.getByRole('button', { name: 'About this list' }));
+        const help = await screen.findByTestId('service-filter-help');
 
         expect(within(help).getByText(/Services are read from the job label/)).toBeInTheDocument();
         expect(within(help).getByText(/a group of scrape targets with the same purpose/)).toBeInTheDocument();
@@ -238,17 +235,11 @@ describe('ServiceFilterSection', () => {
         expect(screen.queryByLabelText('checkout')).not.toBeInTheDocument();
       });
 
-      it('has no tabs', async () => {
-        await openSection(setup());
-
-        expect(screen.queryAllByRole('tab')).toHaveLength(0);
-      });
-
       it('explains the Knowledge Graph list and the Include all jobs option, with links to the sources', async () => {
         await openSection(setup());
 
-        fireEvent.mouseEnter(screen.getByRole('button', { name: 'About this list' }));
-        const help = await screen.findByRole('tooltip');
+        fireEvent.click(screen.getByRole('button', { name: 'About this list' }));
+        const help = await screen.findByTestId('service-filter-help');
 
         expect(
           within(help).getByText(/Services come from the Knowledge Graph, which lists services that are instrumented/)
@@ -274,8 +265,8 @@ describe('ServiceFilterSection', () => {
         });
         await openSection(setup());
 
-        fireEvent.mouseEnter(screen.getByRole('button', { name: 'About this list' }));
-        const help = await screen.findByRole('tooltip');
+        fireEvent.click(screen.getByRole('button', { name: 'About this list' }));
+        const help = await screen.findByTestId('service-filter-help');
 
         expect(within(help).queryByText(/The Include all jobs option/)).not.toBeInTheDocument();
         expect(linksOf(help)).toEqual([
@@ -334,9 +325,8 @@ describe('ServiceFilterSection', () => {
             screen.getByText('No Knowledge Graph found, so services are read from the job label')
           ).toBeInTheDocument();
 
-          // A __name__ filter does not change the matcher, so only a list that was not remembered is fetched again
           act(() => {
-            result.filtersVariable.setState({ filters: [{ key: '__name__', operator: '=', value: 'up' }] });
+            result.filtersVariable.setState({ filters: [{ key: 'instance', operator: '=', value: 'host-1' }] });
           });
 
           expect(await screen.findByText('Services from the Knowledge Graph')).toBeInTheDocument();
@@ -414,7 +404,12 @@ describe('ServiceFilterSection', () => {
 
         expect(result.section.state.selected).toEqual({ job: ['shop/cart'] });
         expect(managedFilters(result.filtersVariable.state.filters)).toEqual([
-          { key: 'job', operator: '=~', value: 'shop/cart', meta: { source: SERVICE_FILTER_SOURCE } },
+          {
+            key: 'job',
+            operator: '=~',
+            value: 'shop/cart',
+            meta: { source: SERVICE_FILTER_SOURCE, dataSource: 'ds1' },
+          },
         ]);
         expect(result.section.state.active).toBe(true);
       });
@@ -538,7 +533,7 @@ describe('ServiceFilterSection', () => {
           await openSection(setup());
 
           // The tooltip wraps the row of the checkbox
-          fireEvent.mouseEnter(includeAll().closest('label')?.parentElement as HTMLElement);
+          fireEvent.mouseEnter(includeAll());
 
           expect(
             await screen.findByText(
@@ -588,7 +583,7 @@ describe('ServiceFilterSection', () => {
           expect(result.section.state.selected.job).toEqual([]);
         });
 
-        it('drops the selected services of that group from the selection and the filter when the Knowledge Graph option is chosen', async () => {
+        it('drops the selected services of that group from the selection and the filter when all jobs are no longer included', async () => {
           const result = setup();
           await openSection(result);
           toggleIncludeAll();
@@ -736,6 +731,185 @@ describe('ServiceFilterSection', () => {
         expect(result.section.state.selected.job).toEqual([]);
         expect(result.section.state.kgServices).toEqual([]);
         expect(screen.queryByLabelText('cart')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('loading', () => {
+      function deferred<T>() {
+        let resolve: (value: T) => void = () => {};
+        const promise = new Promise<T>((r) => (resolve = r));
+
+        return { promise, resolve };
+      }
+
+      it('does not fetch the list again when a row is checked after the Knowledge Graph request failed', async () => {
+        mockIsKgAvailable.mockResolvedValue(true);
+        mockFetchKgServices.mockRejectedValue(new Error('503'));
+        await openSection(setup());
+        const labelCalls = mockFetchLabelValues.mock.calls.length;
+
+        fireEvent.click(screen.getByLabelText('cart'));
+        fireEvent.click(screen.getByRole('button', { name: 'clear' }));
+        await act(async () => {});
+
+        expect(mockFetchLabelValues.mock.calls).toHaveLength(labelCalls);
+        expect(mockFetchKgServices).toHaveBeenCalledTimes(1);
+        expect(mockLoggerError).toHaveBeenCalledTimes(1);
+        expect(screen.getByTestId('service-filter-list')).toBeInTheDocument();
+      });
+
+      it('tries a failed Knowledge Graph request again when the section opens again', async () => {
+        mockIsKgAvailable.mockResolvedValue(true);
+        mockFetchKgServices.mockRejectedValueOnce(new Error('503'));
+        const result = setup();
+        const { unmount } = render(<result.section.Component model={result.section} />);
+        await screen.findByTestId('service-filter-list');
+        unmount();
+
+        mockFetchKgServices.mockResolvedValue({ services: KG_SERVICES, truncated: false });
+        await openSection(result);
+
+        expect(mockFetchKgServices).toHaveBeenCalledTimes(2);
+        expect(await screen.findByText('Services from the Knowledge Graph')).toBeInTheDocument();
+      });
+
+      it('keeps the list of the current filters when the filters change and change back before the response', async () => {
+        const result = setup();
+        await openSection(result);
+        const slow = deferred<string[]>();
+        mockFetchLabelValues.mockImplementationOnce(() => slow.promise);
+
+        act(() => {
+          result.filtersVariable.setState({ filters: [{ key: 'instance', operator: '=', value: 'host-1' }] });
+        });
+        act(() => {
+          result.filtersVariable.setState({ filters: [] });
+        });
+        await act(async () => slow.resolve(['elsewhere/other']));
+
+        expect(rows()).toEqual(['cart', 'checkout', 'prometheus']);
+        expect(screen.getByText('0 of 3 selected')).toBeInTheDocument();
+      });
+
+      it('keeps the rows on screen while the list loads again, so that focus stays on them', async () => {
+        const result = setup();
+        await openSection(result);
+        const slow = deferred<string[]>();
+        mockFetchLabelValues.mockImplementationOnce(() => slow.promise);
+
+        act(() => {
+          result.filtersVariable.setState({ filters: [{ key: 'instance', operator: '=', value: 'host-1' }] });
+        });
+
+        expect(result.section.state.loading).toBe(true);
+        expect(rows()).toEqual(['cart', 'checkout', 'prometheus']);
+        expect(
+          screen.getByText('No Knowledge Graph found, so services are read from the job label')
+        ).toBeInTheDocument();
+
+        await act(async () => slow.resolve(JOBS));
+      });
+    });
+
+    describe('selected jobs that the list does not show', () => {
+      it('lists them in their own group, so that no filter applies without a checked row', async () => {
+        mockIsKgAvailable.mockResolvedValue(true);
+        mockFetchKgServices.mockResolvedValue({ services: KG_SERVICES, truncated: false });
+        const result = setup([], (section) => section.updateFromUrl({ [JOB_URL_KEY]: 'prod/checkout' }));
+        await openSection(result);
+
+        expect(screen.getByText('Selected jobs not in this list (1)')).toBeInTheDocument();
+        expect(screen.getByLabelText('prod/checkout')).toBeChecked();
+        expect(screen.getByText('1 of 3 selected')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByLabelText('prod/checkout'));
+
+        expect(result.section.state.selected.job).toEqual([]);
+        expect(managedFilters(result.filtersVariable.state.filters)).toEqual([]);
+        expect(screen.queryByText(/Selected jobs not in this list/)).not.toBeInTheDocument();
+      });
+
+      it('lists a selected job that the data source no longer has after the time range changed', async () => {
+        const result = setup();
+        await openSection(result);
+        fireEvent.click(screen.getByLabelText('cart'));
+        mockLabelValues({ job: ['prometheus'] });
+
+        act(() => {
+          result.timeRange.setState({ from: 'now-6h', to: 'now' });
+        });
+
+        expect(await screen.findByLabelText('shop/cart')).toBeChecked();
+        expect(screen.getByText('1 of 2 selected')).toBeInTheDocument();
+      });
+    });
+
+    describe('rows', () => {
+      it('describes a service with its jobs, which the title shows only on hover', async () => {
+        await openSection(setup());
+
+        expect(screen.getByLabelText('checkout')).toHaveAttribute(
+          'aria-description',
+          'prod/checkout, staging/checkout'
+        );
+        expect(screen.getByLabelText('prometheus')).not.toHaveAttribute('aria-description');
+      });
+
+      it('finds a service by one of its jobs', async () => {
+        await openSection(setup());
+
+        fireEvent.change(screen.getByLabelText('Search filter options'), { target: { value: 'staging' } });
+
+        expect(rows()).toEqual(['checkout']);
+      });
+
+      it('clears the mixed state of a row that is no longer partly selected', async () => {
+        mockIsKgAvailable.mockResolvedValue(true);
+        mockFetchKgServices.mockResolvedValue({ services: KG_SERVICES, truncated: false });
+        mockLabelValues({ job: [...JOBS, 'other/cart'] });
+        await openSection(setup());
+        const includeAll = () => screen.getByRole('checkbox', { name: 'Include all jobs' });
+        fireEvent.click(screen.getByLabelText('cart'));
+        fireEvent.click(includeAll());
+        expect(screen.getByLabelText('cart')).toBePartiallyChecked();
+
+        fireEvent.click(includeAll());
+
+        expect(screen.getByLabelText('cart')).not.toBePartiallyChecked();
+        expect(screen.getByLabelText('cart')).toBeChecked();
+      });
+
+      it('puts the tooltip of Include all jobs on the checkbox, with no extra tab stop', async () => {
+        mockIsKgAvailable.mockResolvedValue(true);
+        mockFetchKgServices.mockResolvedValue({ services: KG_SERVICES, truncated: false });
+        await openSection(setup());
+        const box = screen.getByRole('checkbox', { name: 'Include all jobs' });
+
+        expect(box.closest('div[tabindex]')).toBeNull();
+
+        fireEvent.mouseEnter(box);
+        await screen.findByRole('tooltip');
+
+        const describedBy = box.getAttribute('aria-describedby');
+        expect(describedBy).toBeTruthy();
+        expect(document.getElementById(describedBy as string)).toHaveTextContent(
+          /Adds the other values of the job label/
+        );
+      });
+    });
+
+    describe('captions', () => {
+      it('says that no job was found when the data source returns none, whatever the Knowledge Graph lists', async () => {
+        mockIsKgAvailable.mockResolvedValue(true);
+        mockFetchKgServices.mockResolvedValue({ services: KG_SERVICES, truncated: false });
+        mockLabelValues({ job: [] });
+        const result = setup();
+        render(<result.section.Component model={result.section} />);
+
+        expect(await screen.findByText('No jobs found for the selected filters and time range')).toBeInTheDocument();
+        expect(screen.queryByText(/The Knowledge Graph lists no services/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/selected$/)).not.toBeInTheDocument();
+        expect(screen.getByText('No results.')).toBeInTheDocument();
       });
     });
   });
@@ -1114,7 +1288,7 @@ describe('ServiceFilterSection', () => {
           key: 'job',
           operator: '=~',
           value: 'shop/cart|prometheus',
-          meta: { source: SERVICE_FILTER_SOURCE },
+          meta: { source: SERVICE_FILTER_SOURCE, dataSource: 'ds1' },
         },
       ]);
       expect(section.state.active).toBe(true);
@@ -1228,7 +1402,7 @@ describe('ServiceFilterSection', () => {
             key: 'job',
             operator: '=~',
             value: 'shop/cart|prod/checkout',
-            meta: { source: SERVICE_FILTER_SOURCE },
+            meta: { source: SERVICE_FILTER_SOURCE, dataSource: 'ds1' },
           },
         ]);
         expect(section.state.selected).toEqual({ job: ['shop/cart', 'prod/checkout'] });
@@ -1248,7 +1422,7 @@ describe('ServiceFilterSection', () => {
         const { filtersVariable } = setup([restored], restoreSelection);
 
         expect(filtersVariable.state.filters.filter((f) => f.key === 'job')).toEqual([
-          { ...restored, meta: { source: SERVICE_FILTER_SOURCE } },
+          { ...restored, meta: { source: SERVICE_FILTER_SOURCE, dataSource: 'ds1' } },
         ]);
       });
 
@@ -1265,8 +1439,88 @@ describe('ServiceFilterSection', () => {
 
         expect(filtersVariable.state.filters.filter((f) => f.key === 'job')).toEqual([
           typedByUser,
-          { key: 'job', operator: '=~', value: 'shop/cart|prod/checkout', meta: { source: SERVICE_FILTER_SOURCE } },
+          {
+            key: 'job',
+            operator: '=~',
+            value: 'shop/cart|prod/checkout',
+            meta: { source: SERVICE_FILTER_SOURCE, dataSource: 'ds1' },
+          },
         ]);
+      });
+    });
+
+    describe('a section built again when the user comes back from a metric', () => {
+      // Scenes gives the new section no URL state, while the top filters keep the filter of the replaced section
+      const managed = (value: string, dataSource = 'ds1'): AdHocFilterWithLabels => ({
+        key: 'job',
+        operator: '=~',
+        value,
+        meta: { source: SERVICE_FILTER_SOURCE, dataSource },
+      });
+
+      it('takes back the filter that the URL kept, and tells the sidebar button', () => {
+        const { section, filtersVariable, onValueChanged } = setup([managed('shop/cart')], undefined, {
+          urlSelection: ['shop/cart'],
+          urlShowExtras: true,
+        });
+
+        expect(section.state.selected.job).toEqual(['shop/cart']);
+        expect(section.state.showExtras).toBe(true);
+        expect(section.state.active).toBe(true);
+        expect(filtersVariable.state.filters).toEqual([managed('shop/cart')]);
+        expect(onValueChanged).toHaveBeenLastCalledWith({ key: SERVICE_FILTER_SECTION_KEY, values: ['shop/cart'] });
+      });
+
+      it('takes back an equal filter that lost its marker in a reload', () => {
+        const { section, filtersVariable } = setup([{ key: 'job', operator: '=~', value: 'shop/cart' }], undefined, {
+          urlSelection: ['shop/cart'],
+        });
+
+        expect(section.state.selected.job).toEqual(['shop/cart']);
+        expect(managedFilters(filtersVariable.state.filters)).toHaveLength(1);
+      });
+
+      it('does not write back a filter that the user deleted meanwhile, and clears the selection in the URL', () => {
+        const { section, filtersVariable, onValueChanged } = setup([], undefined, { urlSelection: ['shop/cart'] });
+
+        expect(section.state.selected.job).toEqual([]);
+        expect(filtersVariable.state.filters).toEqual([]);
+        expect(section.getUrlState()[JOB_URL_KEY]).toBe('');
+        expect(onValueChanged).toHaveBeenLastCalledWith({ key: SERVICE_FILTER_SECTION_KEY, values: [] });
+      });
+
+      it('leaves a filter that the user edited meanwhile to the user', () => {
+        const { section, filtersVariable } = setup([managed('shop/other')], undefined, {
+          urlSelection: ['shop/cart'],
+        });
+
+        expect(section.state.selected.job).toEqual([]);
+        expect(filtersVariable.state.filters).toEqual([{ key: 'job', operator: '=~', value: 'shop/other' }]);
+      });
+
+      it('removes a filter of the data source that the user left meanwhile', () => {
+        const { section, filtersVariable } = setup([managed('shop/cart', 'ds2')], undefined, {
+          urlSelection: ['shop/cart'],
+        });
+
+        expect(section.state.selected.job).toEqual([]);
+        expect(filtersVariable.state.filters).toEqual([]);
+      });
+
+      it('lets go of a managed filter that has no selection in the URL, so that it shows as a filter of the user', () => {
+        const { section, filtersVariable } = setup([managed('shop/cart')], undefined, { urlSelection: [] });
+
+        expect(section.state.selected.job).toEqual([]);
+        expect(filtersVariable.state.filters).toEqual([{ key: 'job', operator: '=~', value: 'shop/cart' }]);
+      });
+
+      it('leaves a selection that the URL restored at page load to the URL restore', () => {
+        const { section, filtersVariable } = setup([], (s) => s.updateFromUrl({ [JOB_URL_KEY]: 'shop/cart' }), {
+          urlSelection: ['other/x'],
+        });
+
+        expect(section.state.selected.job).toEqual(['shop/cart']);
+        expect(managedFilters(filtersVariable.state.filters)).toMatchObject([{ value: 'shop/cart' }]);
       });
     });
 

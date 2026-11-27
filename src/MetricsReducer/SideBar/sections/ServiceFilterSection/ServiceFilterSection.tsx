@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { t } from '@grafana/i18n';
+import { t, Trans } from '@grafana/i18n';
 import {
   AdHocFiltersVariable,
   sceneGraph,
@@ -9,7 +9,18 @@ import {
   type SceneComponentProps,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
-import { Button, Checkbox, Icon, IconButton, Input, Spinner, TextLink, Tooltip, useStyles2 } from '@grafana/ui';
+import {
+  Button,
+  Checkbox,
+  Icon,
+  IconButton,
+  Input,
+  Spinner,
+  TextLink,
+  Toggletip,
+  Tooltip,
+  useStyles2,
+} from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
 
 import { getSharedListStyles } from 'MetricsReducer/SideBar/sections/sharedListStyles';
@@ -21,10 +32,11 @@ import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
-import { fetchInstrumentedServices } from './knowledgeGraphServices';
+import { fetchInstrumentedServices, KG_MAX_JOBS } from './knowledgeGraphServices';
 import {
   adoptServiceFilter,
   getFiltersWithoutManagedFilter,
+  getManagedServiceFilter,
   isServiceSelectionApplied,
   releaseManagedServiceFilter,
   removeManagedServiceFilter,
@@ -48,10 +60,14 @@ const LABELS: ServiceLabel[] = [JOB_LABEL];
 export type ServiceSource = 'knowledge-graph' | 'job';
 
 /**
- * Why the list reads the job label: the stack has no usable Knowledge Graph (no data source, or its request failed), or
- * the Knowledge Graph lists no service that has a job in this data source.
+ * Why the list reads the job label: the stack has no usable Knowledge Graph (no data source, or its request failed),
+ * the Knowledge Graph lists no service that has a job in this data source, or the data source returned no job at all
+ * (no series match the filters, or the request failed).
  */
-type ServiceFallback = 'no-knowledge-graph' | 'no-services';
+type ServiceFallback = 'no-knowledge-graph' | 'no-services' | 'no-jobs';
+
+/** The rows of a group. `hidden` holds the selected jobs that no other group shows, so that no filter is invisible. */
+type RowGroup = ServiceSource | 'extra' | 'hidden';
 
 /**
  * The selection is stored as the exact job values, so that the filter can be rebuilt from the URL without fetching the
@@ -95,10 +111,20 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
   private requestId = 0;
 
   /**
-   * What the list was fetched for (the matcher of the top filters and the time range), to refetch only when one of
-   * them changed what the list shows
+   * What the shown list was fetched for (the matcher of the top filters and the time range), to refetch only when one
+   * of them changed what the list shows. `shownComplete` is false when that request failed or found nothing.
    */
-  private loadedKey: string | undefined;
+  private shownKey: string | undefined;
+  private shownComplete = false;
+
+  /** What the request in flight fetches, so that going back to the shown key drops that request */
+  private pendingKey: string | undefined;
+
+  /**
+   * The selection that the URL held when the sidebar was built. Scenes gives a section that is built again (when the
+   * user comes back from a metric) no URL state, so the section uses this to take back its filter.
+   */
+  private urlHint: { selection: string[]; showExtras: boolean } | undefined;
 
   /** Whether the stack has a Knowledge Graph data source. It does not change while the page is open, so it is asked once. */
   private knowledgeGraphAvailable: Promise<boolean> | undefined;
@@ -116,6 +142,8 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
     icon,
     disabled,
     active,
+    urlSelection,
+    urlShowExtras,
   }: {
     key: ServiceFilterSectionState['key'];
     title: ServiceFilterSectionState['title'];
@@ -123,6 +151,10 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
     icon: ServiceFilterSectionState['icon'];
     disabled?: ServiceFilterSectionState['disabled'];
     active?: ServiceFilterSectionState['active'];
+    /** The selected jobs that the URL holds when the sidebar is built */
+    urlSelection?: string[];
+    /** Whether the URL says that all jobs are included */
+    urlShowExtras?: boolean;
   }) {
     super({
       key,
@@ -141,6 +173,7 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
       selected: { [JOB_LABEL]: [] },
     });
 
+    this.urlHint = { selection: urlSelection ?? [], showExtras: urlShowExtras ?? false };
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
@@ -204,6 +237,7 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
     const unsubscribes: Array<() => void> = [];
 
     if (filtersVariable) {
+      this.restoreSelection(filtersVariable);
       // The URL is restored before the sidebar activates, so a selection without a filter now has none to wait for
       this.reconcile({ apply: true });
 
@@ -234,8 +268,60 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
     return () => unsubscribes.forEach((unsubscribe) => unsubscribe());
   }
 
+  /**
+   * The list page is built again when the user comes back from a metric, and Scenes gives the new section no URL state,
+   * so it starts with no selection while its filter is still in the top filters. The section takes the filter back when
+   * it equals the selection that the URL kept. It does not write back a filter that the user deleted meanwhile, it
+   * leaves a filter that the user edited to the user, and it removes a filter of another data source. The state change
+   * also writes the URL, which otherwise keeps the selection of the section that was replaced.
+   */
+  private restoreSelection(filtersVariable: AdHocFiltersVariable) {
+    const hint = this.urlHint;
+    this.urlHint = undefined;
+
+    // A selection from the URL (a page load) is handled by reconcile
+    if (!hint || hasSelection(this.state.selected)) {
+      return;
+    }
+
+    const managed = getManagedServiceFilter(filtersVariable, JOB_LABEL);
+    const dataSource = this.getDataSource();
+
+    if (!managed && !hint.selection.length) {
+      return;
+    }
+
+    let restored = false;
+
+    this.writing = true;
+    try {
+      if (managed?.dataSource && dataSource && managed.dataSource !== dataSource) {
+        removeManagedServiceFilter(filtersVariable, JOB_LABEL);
+      } else if (hint.selection.length && adoptServiceFilter(filtersVariable, JOB_LABEL, hint.selection, dataSource)) {
+        restored = true;
+      } else if (managed) {
+        releaseManagedServiceFilter(filtersVariable, JOB_LABEL);
+      }
+    } finally {
+      this.writing = false;
+    }
+
+    const selected = { [JOB_LABEL]: restored ? hint.selection : [] };
+
+    this.applied[JOB_LABEL] = restored;
+    this.setState({ selected, showExtras: hint.showExtras, active: restored });
+    this.publishValues();
+  }
+
+  private getDataSource(): string | undefined {
+    const value = sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue();
+
+    return typeof value === 'string' && value ? value : undefined;
+  }
+
   private onActivate() {
-    this.ensureLoaded();
+    // Opening the section tries a failed list again
+    this.ensureLoaded({ retry: true });
 
     const filtersVariable = this.getFiltersVariable();
 
@@ -277,13 +363,27 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
     return this.knowledgeGraphAvailable;
   }
 
-  /** Loads the list, unless it is already loaded for the same top filters and time range */
-  private ensureLoaded() {
+  /**
+   * Loads the list, unless it is shown or being fetched for the same top filters and time range. A list that failed or
+   * came back empty is fetched again when the filters or the time range change, or with `retry` when the section opens.
+   * The section's own filter changes nothing that the list depends on, so it never fetches the list again.
+   */
+  private ensureLoaded({ retry = false }: { retry?: boolean } = {}) {
     const matcher = buildTopFiltersMatcher(this.getFilters(), JOB_LABEL) ?? '';
     const { from, to } = sceneGraph.getTimeRange(this).state;
     const key = JSON.stringify([matcher, from, to]);
 
-    if (this.loadedKey === key) {
+    if (key === this.pendingKey) {
+      return;
+    }
+
+    if (key === this.shownKey && (this.shownComplete || !retry)) {
+      if (this.pendingKey !== undefined) {
+        // Back to the shown list while a request for other filters runs: its response must not replace the list
+        this.requestId++;
+        this.pendingKey = undefined;
+        this.setState({ loading: false });
+      }
       return;
     }
 
@@ -309,21 +409,23 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
   private async load(key: string) {
     const requestId = ++this.requestId;
 
+    this.pendingKey = key;
     this.setState({ loading: true });
 
     try {
-      const remember = await this.fetchList(requestId);
+      const complete = await this.fetchList(requestId);
 
-      if (remember === undefined) {
+      if (complete === undefined) {
         return;
       }
 
-      // An empty list is not remembered, because the data source helper reports a failed request as an empty list.
-      // A failed Knowledge Graph request is not remembered either. The next change of the filters or of the time range
-      // fetches the list again.
-      this.loadedKey = remember ? key : undefined;
+      // The data source helper reports a failed request as an empty list, so an empty list counts as incomplete, like a
+      // failed Knowledge Graph request
+      this.shownKey = key;
+      this.shownComplete = complete;
     } finally {
       if (requestId === this.requestId) {
+        this.pendingKey = undefined;
         this.setState({ loading: false });
       }
     }
@@ -332,8 +434,8 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
   /**
    * Fetches the list into the state. The jobs of the data source are always fetched. When the stack has a Knowledge
    * Graph, its services are fetched in parallel, and the list uses them when at least one has a job in this data source.
-   * Returns whether the result can be remembered, or undefined when a newer request replaced this one while it was
-   * waiting, in which case the response is dropped.
+   * Returns whether the result is complete, or undefined when a newer request replaced this one while it was waiting,
+   * in which case the response is dropped.
    */
   private async fetchList(requestId: number): Promise<boolean | undefined> {
     const filters = this.getFilters();
@@ -352,7 +454,7 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
 
     this.setState({
       source: useKnowledgeGraph ? 'knowledge-graph' : 'job',
-      fallback: knowledgeGraph ? 'no-services' : 'no-knowledge-graph',
+      fallback: getFallback(serviceGroups, knowledgeGraph),
       serviceGroups,
       kgServices,
       kgTruncated: useKnowledgeGraph && Boolean(knowledgeGraph?.truncated),
@@ -377,7 +479,9 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
 
     // Responses of the previous data source must not fill the list
     this.requestId++;
-    this.loadedKey = undefined;
+    this.pendingKey = undefined;
+    this.shownKey = undefined;
+    this.shownComplete = false;
     this.applied = { [JOB_LABEL]: false };
 
     this.setState({
@@ -424,7 +528,7 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
 
         let isApplied =
           isServiceSelectionApplied(filtersVariable, label, values) ||
-          adoptServiceFilter(filtersVariable, label, values);
+          adoptServiceFilter(filtersVariable, label, values, this.getDataSource());
 
         if (!isApplied && this.applied[label]) {
           // The filter was there and is gone: the user removed it or something cleared the filters
@@ -433,7 +537,7 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
           // A filter that the user edited stays in the top bar, as the user's own filter
           releaseManagedServiceFilter(filtersVariable, label);
         } else if (!isApplied && apply) {
-          setManagedServiceFilter(filtersVariable, label, values);
+          setManagedServiceFilter(filtersVariable, label, values, this.getDataSource());
           isApplied = true;
         }
 
@@ -464,7 +568,7 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
     if (filtersVariable) {
       this.writing = true;
       try {
-        setManagedServiceFilter(filtersVariable, label, values);
+        setManagedServiceFilter(filtersVariable, label, values, this.getDataSource());
       } finally {
         this.writing = false;
       }
@@ -475,18 +579,14 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
   };
 
   /** The services of a group of rows. `extra` is the group of the services that only the job label finds. */
-  private getRows(group: ServiceSource | 'extra'): ServiceGroup[] {
-    const { kgServices, serviceGroups, showExtras } = this.state;
+  private getRows(group: RowGroup): ServiceGroup[] {
+    const rows = getRowGroups(this.state);
 
     if (group === 'extra') {
-      return splitExtras(kgServices, findExtraServices(serviceGroups, kgServices)).others;
+      return rows.others;
     }
 
-    if (group === 'job') {
-      return serviceGroups;
-    }
-
-    return showExtras ? splitExtras(kgServices, findExtraServices(serviceGroups, kgServices)).merged : kgServices;
+    return group === 'hidden' ? rows.hidden : rows.main;
   }
 
   private setShowExtras = (show: boolean) => {
@@ -507,7 +607,7 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
     }
   };
 
-  private onToggle = (group: ServiceSource | 'extra', value: string, checked: boolean) => {
+  private onToggle = (group: RowGroup, value: string, checked: boolean) => {
     const current = this.state.selected[JOB_LABEL];
     // A service stands for all of its jobs, one per namespace
     const affected = this.getRows(group).find((row) => row.service === value)?.jobs ?? [];
@@ -539,40 +639,36 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
     const isKnowledgeGraph = source === 'knowledge-graph';
     const selectedJobs = selected[JOB_LABEL];
 
-    // The services that only the job label finds are offered next to the Knowledge Graph services
-    const extras = useMemo(
-      () => (isKnowledgeGraph ? findExtraServices(serviceGroups, kgServices) : []),
-      [isKnowledgeGraph, serviceGroups, kgServices]
+    const rows = useMemo(
+      () => getRowGroups({ source, serviceGroups, kgServices, showExtras, selected }),
+      [source, serviceGroups, kgServices, showExtras, selected]
     );
-    // A job of the job label that has the name of a Knowledge Graph service is a job of that service, so it joins its row
-    const { merged, others } = useMemo(
-      () => (isKnowledgeGraph && showExtras ? splitExtras(kgServices, extras) : { merged: kgServices, others: [] }),
-      [isKnowledgeGraph, showExtras, kgServices, extras]
-    );
-    const mainItems = useMemo(
-      () => toItems(isKnowledgeGraph ? merged : serviceGroups, selectedJobs),
-      [isKnowledgeGraph, merged, serviceGroups, selectedJobs]
-    );
-    const extraItems = useMemo(() => toItems(others, selectedJobs), [others, selectedJobs]);
+    const hiddenItems = useMemo(() => toItems(rows.hidden, selectedJobs), [rows.hidden, selectedJobs]);
+    const mainItems = useMemo(() => toItems(rows.main, selectedJobs), [rows.main, selectedJobs]);
+    const extraItems = useMemo(() => toItems(rows.others, selectedJobs), [rows.others, selectedJobs]);
+    const visibleHiddenItems = useMemo(() => filterItems(hiddenItems, searchValue), [hiddenItems, searchValue]);
     const visibleItems = useMemo(() => filterItems(mainItems, searchValue), [mainItems, searchValue]);
     const visibleExtraItems = useMemo(() => filterItems(extraItems, searchValue), [extraItems, searchValue]);
 
     // The checkbox exists only when the job label finds jobs that the Knowledge Graph does not list
-    const hasChoice = isKnowledgeGraph && extras.length > 0;
-    const selectedCount = [...mainItems, ...extraItems].filter((item) => item.checked || item.partial).length;
-    const totalCount = mainItems.length + extraItems.length;
+    const hasChoice = isKnowledgeGraph && rows.extras.length > 0;
+    const allItems = [...hiddenItems, ...mainItems, ...extraItems];
+    const selectedCount = allItems.filter((item) => item.checked || item.partial).length;
+    const totalCount = allItems.length;
     const hasManualFilter = getFiltersWithoutManagedFilter(filters, JOB_LABEL).some((f) => f.key === JOB_LABEL);
+    // The first load has nothing to show. A later load keeps the list on screen, so that focus stays where it was.
+    const initialLoad = loading && serviceGroups.length === 0;
+    const hasRows = visibleHiddenItems.length > 0 || visibleItems.length > 0 || visibleExtraItems.length > 0;
 
     return (
       <div className={styles.container}>
         <SectionTitle title={title} description={description} />
 
-        {!loading && (
+        {!initialLoad && (
           <>
             <div className={styles.sourceRow}>
               <div className={styles.source}>{getSourceCaption(isKnowledgeGraph, fallback)}</div>
-              <Tooltip
-                interactive
+              <Toggletip
                 placement="bottom"
                 content={<SourceHelp isKnowledgeGraph={isKnowledgeGraph} hasChoice={hasChoice} />}
               >
@@ -582,24 +678,25 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
                   variant="secondary"
                   aria-label={t('sidebar.service-filter.source-help-label', 'About this list')}
                 />
-              </Tooltip>
+              </Toggletip>
             </div>
             {hasChoice && (
-              <Tooltip
-                placement="bottom"
-                content={t(
-                  'sidebar.service-filter.include-jobs-description',
-                  'Adds the other values of the job label in this data source. A value with the same service name as a Knowledge Graph service joins that service, and the other values are listed below. A job is a group of scrape targets, so these can include exporters and other infrastructure.'
-                )}
-              >
-                <div className={styles.includeRow}>
+              <div className={styles.includeRow}>
+                {/* The tooltip is on the checkbox itself, so that focus reaches it and the description belongs to it */}
+                <Tooltip
+                  placement="bottom"
+                  content={t(
+                    'sidebar.service-filter.include-jobs-description',
+                    'Adds the other values of the job label in this data source. A value with the same service name as a Knowledge Graph service joins that service, and the other values are listed below. A job is a group of scrape targets, so these can include exporters and other infrastructure.'
+                  )}
+                >
                   <Checkbox
                     label={t('sidebar.service-filter.include-jobs', 'Include all jobs')}
                     value={showExtras}
                     onChange={(event) => model.setShowExtras(event.currentTarget.checked)}
                   />
-                </div>
-              </Tooltip>
+                </Tooltip>
+              </div>
             )}
           </>
         )}
@@ -623,7 +720,8 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
             <span>
               {t(
                 'sidebar.service-filter.kg-truncated',
-                'The list may be incomplete. The Knowledge Graph returned more services than the list loads.'
+                'The list may be incomplete, because the Knowledge Graph returned {{limit}} jobs, the most that the list asks for.',
+                { limit: KG_MAX_JOBS }
               )}
             </span>
           </div>
@@ -654,13 +752,15 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
         />
 
         <div className={listStyles.listHeader}>
-          {/* While the list loads, the number of services is not known yet, so the count would read 0 of 0 */}
-          <div>
-            {!loading &&
+          {/* Without rows the count would read 0 of 0, so it shows only when the list has rows */}
+          <div className={styles.count}>
+            {!initialLoad &&
+              totalCount > 0 &&
               t('sidebar.service-filter.selected-count', '{{selected}} of {{total}} selected', {
                 selected: selectedCount,
-                total: totalCount.toLocaleString(),
+                total: totalCount,
               })}
+            {loading && !initialLoad && <Spinner inline size="xs" />}
           </div>
           <Button
             variant="secondary"
@@ -672,14 +772,30 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
           </Button>
         </div>
 
-        {loading && <Spinner inline />}
+        {initialLoad && <Spinner inline />}
 
-        {!loading && !visibleItems.length && !visibleExtraItems.length && (
+        {!initialLoad && !hasRows && (
           <div className={listStyles.noResults}>{t('checkbox-list.no-results', 'No results.')}</div>
         )}
 
-        {!loading && (visibleItems.length > 0 || visibleExtraItems.length > 0) && (
+        {!initialLoad && hasRows && (
           <ul className={listStyles.list} data-testid="service-filter-list">
+            {visibleHiddenItems.length > 0 && (
+              <>
+                <li className={styles.groupHeadingFirst}>
+                  {t('sidebar.service-filter.hidden-heading', 'Selected jobs not in this list ({{total}})', {
+                    total: hiddenItems.length,
+                  })}
+                </li>
+                <ServiceRows
+                  items={visibleHiddenItems}
+                  group="hidden"
+                  listStyles={listStyles}
+                  rowClassName={styles.row}
+                  onToggle={model.onToggle}
+                />
+              </>
+            )}
             <ServiceRows
               items={visibleItems}
               group={source}
@@ -691,7 +807,7 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
               <>
                 <li className={styles.groupHeading}>
                   {t('sidebar.service-filter.extras-heading', 'Other jobs ({{total}})', {
-                    total: extraItems.length.toLocaleString(),
+                    total: extraItems.length,
                   })}
                 </li>
                 <ServiceRows
@@ -720,12 +836,52 @@ function getSourceCaption(isKnowledgeGraph: boolean, fallback: ServiceFallback) 
     return t('sidebar.service-filter.source-kg', 'Services from the Knowledge Graph');
   }
 
-  return fallback === 'no-services'
-    ? t(
+  switch (fallback) {
+    case 'no-jobs':
+      return t('sidebar.service-filter.source-no-jobs', 'No jobs found for the selected filters and time range');
+    case 'no-services':
+      return t(
         'sidebar.service-filter.source-job-no-services',
         'The Knowledge Graph lists no services for this data source, so services are read from the job label'
-      )
-    : t('sidebar.service-filter.source-job', 'No Knowledge Graph found, so services are read from the job label');
+      );
+    default:
+      return t(
+        'sidebar.service-filter.source-job',
+        'No Knowledge Graph found, so services are read from the job label'
+      );
+  }
+}
+
+function getFallback(
+  serviceGroups: ServiceGroup[],
+  knowledgeGraph: Awaited<ReturnType<typeof fetchInstrumentedServices>> | undefined
+): ServiceFallback {
+  if (!serviceGroups.length) {
+    return 'no-jobs';
+  }
+
+  return knowledgeGraph ? 'no-services' : 'no-knowledge-graph';
+}
+
+/** The rows that the list shows, by group, with the selected jobs that no group shows */
+function getRowGroups({
+  source,
+  serviceGroups,
+  kgServices,
+  showExtras,
+  selected,
+}: Pick<ServiceFilterSectionState, 'source' | 'serviceGroups' | 'kgServices' | 'showExtras' | 'selected'>) {
+  const isKnowledgeGraph = source === 'knowledge-graph';
+  // The services that only the job label finds are offered next to the Knowledge Graph services
+  const extras = isKnowledgeGraph ? findExtraServices(serviceGroups, kgServices) : [];
+  // A job of the job label that has the name of a Knowledge Graph service is a job of that service, so it joins its row
+  const { merged, others } =
+    isKnowledgeGraph && showExtras ? splitExtras(kgServices, extras) : { merged: kgServices, others: [] };
+  const main = isKnowledgeGraph ? merged : serviceGroups;
+  const shownJobs = new Set([...main, ...others].flatMap((row) => row.jobs));
+  const hidden = selected[JOB_LABEL].filter((job) => !shownJobs.has(job)).map((job) => ({ service: job, jobs: [job] }));
+
+  return { extras, main, others, hidden };
 }
 
 /**
@@ -735,28 +891,31 @@ function getSourceCaption(isKnowledgeGraph: boolean, fallback: ServiceFallback) 
  */
 function SourceHelp({ isKnowledgeGraph, hasChoice }: Readonly<{ isKnowledgeGraph: boolean; hasChoice: boolean }>) {
   const styles = useStyles2(getStyles);
+  const option = t('sidebar.service-filter.include-jobs', 'Include all jobs');
 
   if (isKnowledgeGraph) {
     return (
-      <div className={styles.help}>
+      <div className={styles.help} data-testid="service-filter-help">
         <p>
-          {t(
-            'sidebar.service-filter.help-kg',
-            'Services come from the Knowledge Graph, which lists services that are instrumented with OpenTelemetry or other APM tools. Selecting a service filters the metrics by its job values. Only jobs that exist in this data source are used.'
-          )}{' '}
-          <TextLink external href={KNOWLEDGE_GRAPH_URL}>
-            {t('sidebar.service-filter.help-kg-link', 'Knowledge graph introduction')}
-          </TextLink>
+          <Trans i18nKey="sidebar.service-filter.help-kg">
+            Services come from the Knowledge Graph, which lists services that are instrumented with OpenTelemetry or
+            other APM tools. Selecting a service filters the metrics by its job values. Only jobs that exist in this
+            data source are used.{' '}
+            <TextLink external href={KNOWLEDGE_GRAPH_URL}>
+              Knowledge graph introduction
+            </TextLink>
+          </Trans>
         </p>
         {hasChoice && (
           <p>
-            {t(
-              'sidebar.service-filter.help-jobs',
-              'The Include all jobs option also lists the values of the job label that the Knowledge Graph does not list. In Prometheus, a job is a group of scrape targets with the same purpose, so these can be exporters and other infrastructure as well as services.'
-            )}{' '}
-            <TextLink external href={PROMETHEUS_JOBS_URL}>
-              {t('sidebar.service-filter.help-prometheus-link', 'Prometheus: jobs and instances')}
-            </TextLink>
+            <Trans i18nKey="sidebar.service-filter.help-jobs" values={{ option }}>
+              The {'{{option}}'} option also lists the values of the job label that the Knowledge Graph does not list.
+              In Prometheus, a job is a group of scrape targets with the same purpose, so these can be exporters and
+              other infrastructure as well as services.{' '}
+              <TextLink external href={PROMETHEUS_JOBS_URL}>
+                Prometheus: jobs and instances
+              </TextLink>
+            </Trans>
           </p>
         )}
       </div>
@@ -764,27 +923,26 @@ function SourceHelp({ isKnowledgeGraph, hasChoice }: Readonly<{ isKnowledgeGraph
   }
 
   return (
-    <div className={styles.help}>
+    <div className={styles.help} data-testid="service-filter-help">
       <p>
-        {t(
-          'sidebar.service-filter.help-job',
-          'Services are read from the job label. In Prometheus, a job is a group of scrape targets with the same purpose, set in the scrape configuration.'
-        )}{' '}
-        <TextLink external href={PROMETHEUS_JOBS_URL}>
-          {t('sidebar.service-filter.help-prometheus-link', 'Prometheus: jobs and instances')}
-        </TextLink>
+        <Trans i18nKey="sidebar.service-filter.help-job">
+          Services are read from the job label. In Prometheus, a job is a group of scrape targets with the same purpose,
+          set in the scrape configuration.{' '}
+          <TextLink external href={PROMETHEUS_JOBS_URL}>
+            Prometheus: jobs and instances
+          </TextLink>
+        </Trans>
       </p>
       <p>
-        {t(
-          'sidebar.service-filter.help-otel',
-          'OpenTelemetry metrics get the job service.namespace/service.name, or service.name when there is no namespace.'
-        )}{' '}
-        <TextLink external href={OTEL_PROMETHEUS_URL}>
-          {t('sidebar.service-filter.help-otel-link', 'OpenTelemetry: Prometheus compatibility')}
-        </TextLink>{' '}
-        <TextLink external href={GRAFANA_OTLP_URL}>
-          {t('sidebar.service-filter.help-grafana-otlp-link', 'Grafana Cloud: OTLP format considerations')}
-        </TextLink>
+        <Trans i18nKey="sidebar.service-filter.help-otel">
+          OpenTelemetry metrics get the job service.namespace/service.name, or service.name when there is no namespace.{' '}
+          <TextLink external href={OTEL_PROMETHEUS_URL}>
+            OpenTelemetry: Prometheus compatibility
+          </TextLink>{' '}
+          <TextLink external href={GRAFANA_OTLP_URL}>
+            Grafana Cloud: OTLP format considerations
+          </TextLink>
+        </Trans>
       </p>
       <p>
         {t(
@@ -804,27 +962,39 @@ function ServiceRows({
   onToggle,
 }: Readonly<{
   items: ListItem[];
-  group: ServiceSource | 'extra';
+  group: RowGroup;
   listStyles: ReturnType<typeof getSharedListStyles>;
   rowClassName: string;
-  onToggle: (group: ServiceSource | 'extra', value: string, checked: boolean) => void;
+  onToggle: (group: RowGroup, value: string, checked: boolean) => void;
 }>) {
   return (
     <>
-      {items.map((item) => (
-        <li
-          key={`${group}:${item.value}`}
-          className={cx(listStyles.listItem, rowClassName)}
-          title={item.tooltip ?? item.label}
-        >
-          <Checkbox
-            label={item.label}
-            checked={item.checked}
-            indeterminate={item.partial}
-            onChange={(e) => onToggle(group, item.value, e.currentTarget.checked)}
-          />
-        </li>
-      ))}
+      {items.map((item) => {
+        // The jobs of a service are read out with its name, because the title shows only on hover
+        const jobs = item.tooltip && item.tooltip !== item.label ? { 'aria-description': item.tooltip } : {};
+
+        return (
+          <li
+            key={`${group}:${item.value}`}
+            className={cx(listStyles.listItem, rowClassName)}
+            title={item.tooltip ?? item.label}
+          >
+            <Checkbox
+              {...jobs}
+              label={item.label}
+              checked={item.checked}
+              indeterminate={item.partial}
+              // Checkbox sets the mixed state but never clears it, so a row that stops being partial would stay mixed
+              ref={(element) => {
+                if (element) {
+                  element.indeterminate = Boolean(item.partial);
+                }
+              }}
+              onChange={(e) => onToggle(group, item.value, e.currentTarget.checked)}
+            />
+          </li>
+        );
+      })}
     </>
   );
 }
@@ -846,7 +1016,12 @@ function toItems(groups: ServiceGroup[], selectedJobs: string[]): ListItem[] {
 }
 
 function filterItems(items: ListItem[], searchValue: string): ListItem[] {
-  return items.filter((item) => item.label.toLowerCase().includes(searchValue.toLowerCase()));
+  const search = searchValue.toLowerCase();
+
+  // A service is also found by its jobs, e.g. by its namespace
+  return items.filter(
+    (item) => item.label.toLowerCase().includes(search) || Boolean(item.tooltip?.toLowerCase().includes(search))
+  );
 }
 
 /**
@@ -954,6 +1129,17 @@ function getStyles(theme: GrafanaTheme2) {
     // narrow sidebar, and it is cut off at the edge of the list.
     row: css({
       overflowWrap: 'anywhere',
+    }),
+    count: css({
+      display: 'flex',
+      alignItems: 'center',
+      gap: theme.spacing(0.5),
+    }),
+    groupHeadingFirst: css({
+      listStyle: 'none',
+      color: theme.colors.text.secondary,
+      fontSize: theme.typography.sm.fontSize,
+      padding: theme.spacing(0, 0, 0.5),
     }),
     groupHeading: css({
       listStyle: 'none',

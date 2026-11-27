@@ -33,6 +33,14 @@ describe('parseServicesFromJobs', () => {
     expect(parseServicesFromJobs(['ns/'])).toEqual([{ service: 'ns/', jobs: ['ns/'] }]);
   });
 
+  test.each([
+    ['a zero width space', 'ns/\u200b'],
+    ['a control character', 'ns/\u0001'],
+    ['spaces', 'ns/  '],
+  ])('keeps the whole job as the service when the part after the slash is only %s', (_name, job) => {
+    expect(parseServicesFromJobs([job])).toEqual([{ service: job, jobs: [job] }]);
+  });
+
   test('treats a leading slash as an empty namespace', () => {
     expect(parseServicesFromJobs(['/checkout'])).toEqual([{ service: 'checkout', jobs: ['/checkout'] }]);
   });

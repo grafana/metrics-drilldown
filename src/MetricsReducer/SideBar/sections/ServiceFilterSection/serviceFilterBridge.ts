@@ -8,11 +8,33 @@ import { buildServiceFilter } from './serviceMatchers';
  */
 export const SERVICE_FILTER_SOURCE = 'sidebar-service';
 
-function isManagedFilter(filter: AdHocFilterWithLabels, key: string) {
-  // The variable types the meta of its filters as `{}`
-  const meta: { source?: string } | undefined = filter.meta;
+/** What the sidebar keeps on its filter: the marker, and the data source that the selected services belong to */
+export interface ManagedFilterMeta {
+  source: typeof SERVICE_FILTER_SOURCE;
+  dataSource?: string;
+}
 
-  return filter.key === key && meta?.source === SERVICE_FILTER_SOURCE;
+function getMeta(filter: AdHocFilterWithLabels): Partial<ManagedFilterMeta> | undefined {
+  // The variable types the meta of its filters as `{}`
+  return filter.meta;
+}
+
+function isManagedFilter(filter: AdHocFilterWithLabels, key: string) {
+  return filter.key === key && getMeta(filter)?.source === SERVICE_FILTER_SOURCE;
+}
+
+function buildMeta(dataSource: string | undefined): ManagedFilterMeta {
+  return dataSource ? { source: SERVICE_FILTER_SOURCE, dataSource } : { source: SERVICE_FILTER_SOURCE };
+}
+
+/**
+ * Returns the managed filter of the given key, with the data source that it was written for. The marker lives only in
+ * memory, so after a reload no filter is managed until the sidebar adopts it again.
+ */
+export function getManagedServiceFilter(variable: AdHocFiltersVariable, key: string) {
+  const filter = variable.state.filters.find((f) => isManagedFilter(f, key));
+
+  return filter ? { filter, dataSource: getMeta(filter)?.dataSource } : undefined;
 }
 
 /**
@@ -28,7 +50,12 @@ export function getFiltersWithoutManagedFilter(filters: AdHocFilterWithLabels[],
  * same key. An empty selection removes the managed filter. Filters that the sidebar did not write are never changed.
  * The variable is left untouched when the filter would not change, so that no query is refetched for nothing.
  */
-export function setManagedServiceFilter(variable: AdHocFiltersVariable, key: string, values: string[]) {
+export function setManagedServiceFilter(
+  variable: AdHocFiltersVariable,
+  key: string,
+  values: string[],
+  dataSource?: string
+) {
   const { filters } = variable.state;
   const built = buildServiceFilter(key, values);
   const index = filters.findIndex((filter) => isManagedFilter(filter, key));
@@ -40,7 +67,7 @@ export function setManagedServiceFilter(variable: AdHocFiltersVariable, key: str
     return;
   }
 
-  const managedFilter: AdHocFilterWithLabels = { ...built, meta: { source: SERVICE_FILTER_SOURCE } };
+  const managedFilter: AdHocFilterWithLabels = { ...built, meta: buildMeta(dataSource) };
 
   if (index === -1) {
     variable.setState({ filters: [...filters, managedFilter] });
@@ -49,7 +76,11 @@ export function setManagedServiceFilter(variable: AdHocFiltersVariable, key: str
 
   const current = filters[index];
 
-  if (current.operator === managedFilter.operator && current.value === managedFilter.value) {
+  if (
+    current.operator === managedFilter.operator &&
+    current.value === managedFilter.value &&
+    getMeta(current)?.dataSource === dataSource
+  ) {
     return;
   }
 
@@ -110,7 +141,7 @@ export function isServiceSelectionApplied(variable: AdHocFiltersVariable, key: s
  * exact same key, operator and value has the same effect on every query, so claiming it changes no result.
  * Returns true when the selection is applied by a managed filter after the call.
  */
-export function adoptServiceFilter(variable: AdHocFiltersVariable, key: string, values: string[]) {
+export function adoptServiceFilter(variable: AdHocFiltersVariable, key: string, values: string[], dataSource?: string) {
   const built = buildServiceFilter(key, values);
 
   if (!built) {
@@ -135,9 +166,7 @@ export function adoptServiceFilter(variable: AdHocFiltersVariable, key: string, 
   }
 
   variable.setState({
-    filters: filters.map((filter, i) =>
-      i === index ? { ...filter, meta: { source: SERVICE_FILTER_SOURCE } } : filter
-    ),
+    filters: filters.map((filter, i) => (i === index ? { ...filter, meta: buildMeta(dataSource) } : filter)),
   });
 
   return true;

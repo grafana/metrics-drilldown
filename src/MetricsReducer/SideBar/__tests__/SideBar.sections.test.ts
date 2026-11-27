@@ -1,13 +1,8 @@
 import { availableIconsIndex } from '@grafana/data';
-import {
-  EmbeddedScene,
-  SceneFlexItem,
-  SceneFlexLayout,
-  SceneVariableSet,
-  type AdHocFiltersVariable,
-} from '@grafana/scenes';
+import { AdHocFiltersVariable, EmbeddedScene, SceneFlexItem, SceneFlexLayout, SceneVariableSet } from '@grafana/scenes';
 
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { VAR_FILTERS } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
 import { ServiceFilterSection } from '../sections/ServiceFilterSection/ServiceFilterSection';
@@ -140,6 +135,60 @@ describe('SideBar service filter', () => {
 
       deactivate();
       deactivateScene();
+    });
+  });
+
+  describe('a sidebar built again when the user comes back from a metric', () => {
+    // Scenes gives the new sidebar no URL state, while the URL and the top filters keep what the old one wrote
+    function activateWithFilters(filters: AdHocFiltersVariable['state']['filters']) {
+      const filtersVariable = new AdHocFiltersVariable({
+        name: VAR_FILTERS,
+        datasource: null,
+        applyMode: 'manual',
+        filters,
+      });
+      const trailVariables = new SceneVariableSet({ variables: [filtersVariable] });
+      const sidebar = new SideBar({});
+      const scene = new EmbeddedScene({
+        $variables: trailVariables,
+        body: new SceneFlexLayout({ children: [new SceneFlexItem({ body: sidebar })] }),
+      });
+      mockGetTrailFor.mockReturnValue({ state: { $variables: trailVariables } });
+      mockEvaluateFeatureFlag.mockResolvedValue('control');
+      const deactivateScene = scene.activate();
+      const deactivate = sidebar.activate();
+
+      return {
+        sidebar,
+        section: sidebar.state.sections[1] as ServiceFilterSection,
+        filtersVariable,
+        cleanup: () => {
+          deactivate();
+          deactivateScene();
+        },
+      };
+    }
+
+    it('takes back the filter that the top filters kept, with the choice to include all jobs', () => {
+      window.history.pushState({}, '', '/?filters-service-job=shop%2Fcart&filters-service-more=1');
+
+      const { section, sidebar, cleanup } = activateWithFilters([{ key: 'job', operator: '=~', value: 'shop/cart' }]);
+
+      expect(section.state.selected.job).toEqual(['shop/cart']);
+      expect(section.state.showExtras).toBe(true);
+      expect(sidebar.state.sectionValues.get('filters-service')).toEqual(['shop/cart']);
+      cleanup();
+    });
+
+    it('clears the button when the filter was deleted while the user was on a metric', () => {
+      window.history.pushState({}, '', '/?filters-service-job=shop%2Fcart');
+
+      const { section, sidebar, filtersVariable, cleanup } = activateWithFilters([]);
+
+      expect(section.state.selected.job).toEqual([]);
+      expect(filtersVariable.state.filters).toEqual([]);
+      expect(sidebar.state.sectionValues.get('filters-service')).toEqual([]);
+      cleanup();
     });
   });
 
