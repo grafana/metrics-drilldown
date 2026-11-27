@@ -24,6 +24,39 @@ export function useQuickSearchAssistantAvailability(): boolean {
   return isAvailable;
 }
 
+type QuickSearchContextInput = {
+  datasourceUid: string;
+  filters: Array<{ key: string; operator: string; value: string }>;
+  timeRange: { from: string; to: string };
+};
+
+/** Pure builder for the quick-search Assistant context. Covered by the assistant evals (src/evals). */
+export function buildQuickSearchContext({ datasourceUid, filters, timeRange }: QuickSearchContextInput) {
+  const context = [];
+
+  if (datasourceUid) {
+    context.push(createAssistantContextItem('datasource', { datasourceUid }));
+  }
+
+  if (filters.length > 0) {
+    context.push(
+      createAssistantContextItem('structured', {
+        title: t('quick-search-assistant.label-filters-title', 'Current label filters'),
+        data: { filters: filters.map((f) => ({ key: f.key, operator: f.operator, value: f.value })) },
+      })
+    );
+  }
+
+  context.push(
+    createAssistantContextItem('structured', {
+      title: t('quick-search-assistant.time-range-title', 'Time range'),
+      data: { from: timeRange.from, to: timeRange.to },
+    })
+  );
+
+  return context;
+}
+
 /**
  * Opens the Grafana Assistant with context from the current scene.
  * Passes datasource, label filters, and time range as context.
@@ -36,44 +69,15 @@ export function openQuickSearchAssistant(sceneObject: SceneObject, question: str
     return;
   }
 
-  const context = [];
-
-  // Datasource context
   const dsVariable = sceneGraph.findByKey(sceneObject, VAR_DATASOURCE) as DataSourceVariable | undefined;
-  const datasourceUid = (dsVariable?.state.value as string) ?? '';
-
-  if (datasourceUid) {
-    context.push(createAssistantContextItem('datasource', { datasourceUid }));
-  }
-
-  // Label filters context
   const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, sceneObject);
-  if (isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.filters.length > 0) {
-    context.push(
-      createAssistantContextItem('structured', {
-        title: t('quick-search-assistant.label-filters-title', 'Current label filters'),
-        data: {
-          filters: filtersVariable.state.filters.map((f) => ({
-            key: f.key,
-            operator: f.operator,
-            value: f.value,
-          })),
-        },
-      })
-    );
-  }
-
-  // Time range context
   const timeRange = sceneGraph.getTimeRange(sceneObject).state;
-  context.push(
-    createAssistantContextItem('structured', {
-      title: t('quick-search-assistant.time-range-title', 'Time range'),
-      data: {
-        from: timeRange.from,
-        to: timeRange.to,
-      },
-    })
-  );
+
+  const context = buildQuickSearchContext({
+    datasourceUid: (dsVariable?.state.value as string) ?? '',
+    filters: isAdHocFiltersVariable(filtersVariable) ? filtersVariable.state.filters : [],
+    timeRange: { from: timeRange.from, to: timeRange.to },
+  });
 
   // Track the event
   reportExploreMetrics('quick_search_assistant_question_asked', { question });

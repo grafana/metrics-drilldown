@@ -161,6 +161,8 @@ type Interactions = {
   quick_search_assistant_question_asked: { question: string };
   // User enters assistant mode in the Quick Search input (e.g., by typing '?', clicking the AI button, or using the Tab+Enter keyboard flow)
   quick_search_assistant_mode_entered: { from: 'question_mark' | 'tab' | 'button' };
+  // User clicks "Explain in Assistant" in a metric panel menu. Flags only: never the query or metric name.
+  explain_in_assistant_clicked: { has_query: boolean; has_datasource: boolean; has_metadata: boolean };
   // User opens the save query modal
   saved_query_save_modal_opened: {};
   // User successfully saves a query (local storage only, Query Library save has no callback)
@@ -225,6 +227,7 @@ export function getExperimentPayloads<E extends keyof Interactions, P extends In
   if (
     event === 'quick_search_assistant_question_asked' ||
     event === 'quick_search_assistant_mode_entered' ||
+    event === 'explain_in_assistant_clicked' ||
     event === 'app_initialized' ||
     event === 'metric_selected'
   ) {
