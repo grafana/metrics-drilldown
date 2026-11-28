@@ -71,6 +71,8 @@ export function buildServiceFilter(key: string, values: string[]): AdHocVariable
   return {
     key,
     operator: '=~',
-    value: uniqueValues.map(escapeRegExp).join('|'),
+    // A quote is written as \x22, so that a job that is only quotes (`""`) is not read as the empty value by
+    // buildFilterExpression, which would match series without a job
+    value: uniqueValues.map((value) => escapeRegExp(value).replace(/"/g, '\\x22')).join('|'),
   };
 }

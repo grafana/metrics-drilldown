@@ -19,7 +19,9 @@ export function buildTopFiltersMatcher(filters: AdHocFilterWithLabels[], key: st
     .map(buildFilterExpression)
     .join(',');
 
-  return expression ? `{${expression}}` : undefined;
+  // Prometheus rejects a selector whose matchers all accept the empty value (e.g. only `instance!="host-1"`), so an
+  // always nonempty matcher comes first, as in LabelsVariable
+  return expression ? `{__name__=~".+",${expression}}` : undefined;
 }
 
 async function fetchSortedLabelValues(

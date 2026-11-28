@@ -1166,7 +1166,9 @@ describe('ServiceFilterSection', () => {
         filtersVariable.setState({ filters: [{ key: 'instance', operator: '=', value: 'host-1' }] });
       });
 
-      await waitFor(() => expect(mockFetchLabelValues).toHaveBeenCalledWith('job', section, '{instance="host-1"}'));
+      await waitFor(() =>
+        expect(mockFetchLabelValues).toHaveBeenCalledWith('job', section, '{__name__=~".+",instance="host-1"}')
+      );
     });
 
     it('refetches the list when the time range changes', async () => {
@@ -1469,6 +1471,13 @@ describe('ServiceFilterSection', () => {
         expect(section.state.active).toBe(true);
         expect(filtersVariable.state.filters).toEqual([managed('shop/cart')]);
         expect(onValueChanged).toHaveBeenLastCalledWith({ key: SERVICE_FILTER_SECTION_KEY, values: ['shop/cart'] });
+      });
+
+      it('keeps Include all jobs checked when no service was selected', () => {
+        const { section } = setup([], undefined, { urlSelection: [], urlShowExtras: true });
+
+        expect(section.state.showExtras).toBe(true);
+        expect(section.getUrlState()[MORE_URL_KEY]).toBe('1');
       });
 
       it('takes back an equal filter that lost its marker in a reload', () => {

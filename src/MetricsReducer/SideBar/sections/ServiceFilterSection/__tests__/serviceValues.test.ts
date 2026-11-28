@@ -19,6 +19,12 @@ const managed = (key: string, value: string): AdHocFilterWithLabels => ({
 });
 
 describe('buildTopFiltersMatcher', () => {
+  test('starts with a nonempty matcher, because Prometheus rejects a selector of exclusions only', () => {
+    const filters: AdHocFilterWithLabels[] = [{ key: 'instance', operator: '!=', value: 'host-1' }];
+
+    expect(buildTopFiltersMatcher(filters, 'job')).toBe('{__name__=~".+",instance!="host-1"}');
+  });
+
   test('returns undefined when there are no filters', () => {
     expect(buildTopFiltersMatcher([], 'service_name')).toBeUndefined();
   });
@@ -33,20 +39,20 @@ describe('buildTopFiltersMatcher', () => {
       { key: 'pod', operator: '!~', value: 'tmp.*' },
     ];
 
-    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{instance="host-1",pod!~"tmp.*"}');
+    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{__name__=~".+",instance="host-1",pod!~"tmp.*"}');
   });
 
   test('leaves out the managed filter of the key but keeps the managed filter of the other label', () => {
     const filters = [managed('service_name', 'cart'), managed('job', 'shop/cart')];
 
-    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{job=~"shop/cart"}');
-    expect(buildTopFiltersMatcher(filters, 'job')).toBe('{service_name=~"cart"}');
+    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{__name__=~".+",job=~"shop/cart"}');
+    expect(buildTopFiltersMatcher(filters, 'job')).toBe('{__name__=~".+",service_name=~"cart"}');
   });
 
   test('keeps a filter that the user typed for the same label', () => {
     const filters: AdHocFilterWithLabels[] = [{ key: 'service_name', operator: '=', value: 'cart' }];
 
-    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{service_name="cart"}');
+    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{__name__=~".+",service_name="cart"}');
   });
 
   test('leaves out the __name__ filters', () => {
@@ -55,13 +61,13 @@ describe('buildTopFiltersMatcher', () => {
       { key: 'instance', operator: '=', value: 'host-1' },
     ];
 
-    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{instance="host-1"}');
+    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{__name__=~".+",instance="host-1"}');
   });
 
   test('escapes the quotes and backslashes of a value', () => {
     const filters: AdHocFilterWithLabels[] = [{ key: 'path', operator: '=', value: 'a"b\\c' }];
 
-    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{path="a\\"b\\\\c"}');
+    expect(buildTopFiltersMatcher(filters, 'service_name')).toBe('{__name__=~".+",path="a\\"b\\\\c"}');
   });
 });
 
@@ -124,7 +130,7 @@ describe('fetching the services', () => {
 
     await fetchServiceGroups(scene, [{ key: 'instance', operator: '=', value: 'host-1' }, managed('job', 'shop/cart')]);
 
-    expect(mockFetchLabelValues).toHaveBeenCalledWith('job', scene, '{instance="host-1"}');
+    expect(mockFetchLabelValues).toHaveBeenCalledWith('job', scene, '{__name__=~".+",instance="host-1"}');
   });
 
   test('fetchServiceGroups returns an empty list when the datasource gives no value', async () => {
@@ -151,6 +157,6 @@ describe('fetching the services', () => {
 
     await fetchServiceGroups(scene, [managed('job', 'shop/cart'), managed('service_name', 'cart')]);
 
-    expect(mockFetchLabelValues).toHaveBeenCalledWith('job', scene, '{service_name=~"cart"}');
+    expect(mockFetchLabelValues).toHaveBeenCalledWith('job', scene, '{__name__=~".+",service_name=~"cart"}');
   });
 });

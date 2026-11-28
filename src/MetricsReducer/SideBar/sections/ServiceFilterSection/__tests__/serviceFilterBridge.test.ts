@@ -314,6 +314,7 @@ describe('URL round trip', () => {
     ['regex metacharacters', ['a.b', 'c+d', '(e)']],
     ['a comma and a pipe', ['d,e', 'f|g']],
     ['job values with a slash', ['prod/checkout', 'checkout']],
+    ['a job of only quotes and a quote inside', ['""', 'a"b']],
   ])('lets the sidebar claim the filter again after a reload with %s', (_, values) => {
     const variable = createVariable();
     setManagedServiceFilter(variable, JOB_LABEL, values);

@@ -1,4 +1,24 @@
+import { buildFilterExpression } from 'shared/utils/utils.queries';
+
 import { buildServiceFilter, JOB_LABEL, parseServicesFromJobs } from '../serviceMatchers';
+
+describe('buildServiceFilter with quotes', () => {
+  test.each([
+    ['only quotes', ['""'], '\\x22\\x22'],
+    ['a quote inside', ['a"b'], 'a\\x22b'],
+    ['quotes next to other values', ['""', 'shop/cart'], '\\x22\\x22|shop/cart'],
+  ])('writes each quote as \\x22 for a job of %s', (_name, jobs, expected) => {
+    expect(buildServiceFilter(JOB_LABEL, jobs)?.value).toBe(expected);
+  });
+
+  test('keeps a job of only quotes from becoming the empty matcher, which would match series without a job', () => {
+    const filter = buildServiceFilter(JOB_LABEL, ['""']);
+
+    expect(buildFilterExpression(filter!)).toBe('job=~"\\\\x22\\\\x22"');
+    expect(new RegExp(`^(?:${filter!.value})$`).test('""')).toBe(true);
+    expect(new RegExp(`^(?:${filter!.value})$`).test('')).toBe(false);
+  });
+});
 
 describe('parseServicesFromJobs', () => {
   test('returns an empty list when there are no jobs', () => {

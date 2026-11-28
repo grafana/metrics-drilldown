@@ -168,7 +168,8 @@ export class ServiceFilterSection extends SceneObjectBase<ServiceFilterSectionSt
       serviceGroups: [],
       kgServices: [],
       kgTruncated: false,
-      showExtras: false,
+      // A sidebar that is built again gets no URL state, and the choice does not depend on a selection
+      showExtras: urlShowExtras ?? false,
       loading: false,
       selected: { [JOB_LABEL]: [] },
     });
